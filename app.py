@@ -5,8 +5,8 @@ import datetime
 import io
 
 # System Initializations
-from config import initialize_database, logger
-import database
+from config import logger
+from database import initialize_database
 import vuln_collector
 import news_collector
 import regulatory_collector
