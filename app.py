@@ -31,14 +31,21 @@ def render_login_form():
         submitted = st.form_submit_button("Authenticate Sign-In Token")
         
         if submitted:
-            # Simple fallback validation logic for testing and deployment
-            if username == "admin" and password == "pci-dss-pass":
-                st.session_state.authenticated = True
-                st.session_state.user_role = role_selection
-                st.success("Authorization token verified successfully.")
-                st.rerun()
+            # Safely fetch the credential database from st.secrets
+            user_registry = st.secrets.get("users", {})
+            
+            # Verify if user exists and check password match
+            if username in user_registry and user_registry[username]["password"] == password:
+                # Enforce Cryptographic Role Validation (RBAC mapping verification)
+                if user_registry[username]["role"] == role_selection:
+                    st.session_state.authenticated = True
+                    st.session_state.user_role = role_selection
+                    st.success(f"Authorization token verified. Welcome, {username}.")
+                    st.rerun()
+                else:
+                    st.error("Access Refused: Selection profile does not match your assigned corporate role.")
             else:
-                st.error("Invalid credentials or unauthorized role classification.")
+                st.error("Invalid credentials or unauthorized identity token.")
 
 if not st.session_state.authenticated:
     render_login_form()
